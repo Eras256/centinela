@@ -1,0 +1,20 @@
+# NOT deployed this session - see worker/Dockerfile and README "Honest limits".
+# `fly launch` / `fly deploy` from the repo root with `-c worker/fly.toml`.
+app = "centinela"
+primary_region = "qro" # Querétaro, closest to Mexico City
+
+[build]
+  dockerfile = "worker/Dockerfile"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+[processes]
+  app = "/app/worker/loop.sh"
+
+# A human must run, before the first deploy:
+#   fly secrets set GIT_ASKPASS_TOKEN=<a GitHub PAT scoped to this repo only>
+# and wire it into git's credential helper in the Dockerfile/entrypoint -
+# left out deliberately rather than guessed at, since secrets are never
+# printed, logged, or committed by this build.

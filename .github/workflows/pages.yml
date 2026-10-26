@@ -1,0 +1,50 @@
+name: Deploy status page to GitHub Pages
+
+# GitHub Pages substitutes for the originally-planned Vercel deploy: the
+# session's `vercel whoami` returned a different account than the one
+# specified for this build, and the instructions are explicit about
+# stopping rather than deploying under the wrong account. This workflow
+# only needs the repo's own GITHUB_TOKEN. See README "Honest limits".
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - working-directory: web
+        run: npm ci
+      - working-directory: web
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
