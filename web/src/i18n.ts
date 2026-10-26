@@ -15,7 +15,7 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     problemTitle: "El problema",
     problemQuote:
       "“Hoy, si una posición se liquida, el dueño se entera solo porque nota que su BTC desapareció - sin notificación, sin explicación, sin cambio de estado visible.”",
-    problemQuoteSource: "- especificación de UX de Writz, estado: “mecanismo de detección aún no implementado”.",
+    problemQuoteSource: "- especificación de UX de Writz (traducción nuestra del original en inglés), estado: “mecanismo de detección aún no implementado”.",
     problemBody:
       "Tampoco hay aviso ANTES de la liquidación. Centinela cierra los dos huecos: revisa las posiciones cada pocos minutos y te avisa en el momento en que cambia su estado de salud, antes de que sea liquidable - y después, si ya fue tarde.",
     problemNoAffiliation:
