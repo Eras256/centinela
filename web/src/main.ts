@@ -2,6 +2,7 @@ import "./style.css";
 import { t, STATUS_KEY, EXPLAIN_KEY, type Lang } from "./i18n";
 import { classifyFromHealthBp, simulateHealthAfterDrop, pctDropToLiquidation } from "./sim";
 import type { ScanSummary, HistoryEntry, PositionRecord } from "./types";
+import { renderHero, wireHero } from "./hero";
 
 // GitHub Pages has no server-side routing, so the per-position view lives in the hash.
 const POSITION_ROUTE = "#/posicion/";
@@ -533,12 +534,14 @@ function render() {
       ${renderLimits()}`;
   app.innerHTML = `
     ${renderHeader()}
+    ${txid ? "" : renderHero(positions, lang)}
     <main class="wrap">${body}</main>
     ${renderFooter()}`;
   wireLangToggle();
   wireSubscribeButtons();
   wireCopyTopic();
   wireSimulator();
+  if (!txid) wireHero(lang);
 }
 
 window.addEventListener("hashchange", () => {
