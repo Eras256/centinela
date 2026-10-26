@@ -22,3 +22,9 @@ export function classifyFromHealthBp(healthBp: number | "max"): PositionStatus {
 export function simulateHealthAfterDrop(healthBp: number, dropPct: number): number {
   return Math.round(healthBp * ((100 - dropPct) / 100));
 }
+
+/** Same as the root's pctDropToLiquidation: BTC drop (%, one decimal) that brings health to the threshold. */
+export function pctDropToLiquidation(healthBp: number): number {
+  if (healthBp <= LIQUIDATION_THRESHOLD_BP) return 0;
+  return Math.round((1 - LIQUIDATION_THRESHOLD_BP / healthBp) * 1000) / 10;
+}

@@ -1,6 +1,6 @@
 import "./style.css";
 import { t, STATUS_KEY, EXPLAIN_KEY, type Lang } from "./i18n";
-import { classifyFromHealthBp, simulateHealthAfterDrop } from "./sim";
+import { classifyFromHealthBp, simulateHealthAfterDrop, pctDropToLiquidation } from "./sim";
 import type { ScanSummary, HistoryEntry, PositionRecord } from "./types";
 
 // GitHub Pages has no server-side routing, so the per-position view lives in the hash.
@@ -281,10 +281,19 @@ function renderPositionDetail(txid: string): string {
     </section>`;
 }
 
+const HYPO = "__hypothetical";
+const SIM_MAX_DROP = 95;
+
+function isSimulatable(p: PositionRecord): boolean {
+  return p.healthBp !== "max" && p.status !== "closed" && p.status !== "liquidated";
+}
+
 function renderSimulator(preselect?: string): string {
   const rows = positions?.positions ?? [];
+  // With no real position carrying debt, start on the labeled hypothetical so the slider shows something.
+  const selected = preselect ?? rows.find(isSimulatable)?.txidInternal ?? HYPO;
   const options = rows
-    .map((p) => `<option value="${esc(p.txidInternal)}"${p.txidInternal === preselect ? " selected" : ""}>${esc(p.txidDisplay.slice(0, 14))}... (${esc(healthText(p))})</option>`)
+    .map((p) => `<option value="${esc(p.txidInternal)}"${p.txidInternal === selected ? " selected" : ""}>${esc(p.txidDisplay.slice(0, 14))}... (${esc(t(lang, STATUS_KEY[p.status] ?? p.status))}, ${esc(healthText(p))})</option>`)
     .join("");
   return `
     <section id="simulator">
@@ -294,14 +303,22 @@ function renderSimulator(preselect?: string): string {
         <div>
           <div class="sim-field">
             <label for="sim-position">${t(lang, "simulatorPick")}</label>
-            <select id="sim-position">${options}</select>
+            <select id="sim-position">${options}<option value="${HYPO}"${selected === HYPO ? " selected" : ""}>${t(lang, "simHypothetical")}</option></select>
+          </div>
+          <div class="sim-field" id="sim-hypo-field" hidden>
+            <label for="sim-hypo">${t(lang, "simHypoHealth")}</label>
+            <input type="number" id="sim-hypo" min="100" max="1000" step="1" value="180" inputmode="numeric" />
           </div>
           <div class="sim-field">
             <label for="sim-drop">${t(lang, "simulatorDrop")}: <span id="sim-drop-value">0</span>%</label>
-            <input type="range" id="sim-drop" min="0" max="95" step="1" value="0" />
+            <input type="range" id="sim-drop" min="0" max="${SIM_MAX_DROP}" step="1" value="0" />
+            <div class="sim-scale" aria-hidden="true">
+              <span class="sim-liq-mark" id="sim-liq-mark" hidden><span>${t(lang, "simLiqMark")}</span></span>
+            </div>
+            <div class="sim-scale-labels" aria-hidden="true"><span>0%</span><span>${SIM_MAX_DROP}%</span></div>
           </div>
         </div>
-        <div class="sim-result" id="sim-result"></div>
+        <div class="sim-result" id="sim-result" aria-live="polite"></div>
       </div>
     </section>`;
 }
@@ -363,36 +380,75 @@ function wireSimulator() {
   const slider = document.getElementById("sim-drop") as HTMLInputElement | null;
   const valueLabel = document.getElementById("sim-drop-value");
   const result = document.getElementById("sim-result");
-  if (!select || !slider || !result) return;
+  const hypoField = document.getElementById("sim-hypo-field");
+  const hypoInput = document.getElementById("sim-hypo") as HTMLInputElement | null;
+  const liqMark = document.getElementById("sim-liq-mark");
+  if (!select || !slider || !result || !hypoField || !hypoInput || !liqMark) return;
+
+  function blocked(message: string) {
+    slider!.disabled = true;
+    liqMark!.hidden = true;
+    result!.innerHTML = `<p class="text-dim">${message}</p><p class="small text-dim">${t(lang, "simCannot")}</p>`;
+  }
 
   function update() {
-    const pos = positions?.positions.find((p) => p.txidInternal === select!.value);
+    const isHypo = select!.value === HYPO;
+    hypoField!.hidden = !isHypo;
     const dropPct = Number(slider!.value);
     if (valueLabel) valueLabel.textContent = String(dropPct);
-    if (!pos) {
-      result!.innerHTML = "";
-      return;
+
+    let startBp: number;
+    if (isHypo) {
+      const pct = Number(hypoInput!.value);
+      startBp = Math.round(Math.min(1000, Math.max(1, Number.isFinite(pct) && pct > 0 ? pct : 100)) * 100);
+    } else {
+      const pos = positions?.positions.find((p) => p.txidInternal === select!.value);
+      if (!pos) {
+        result!.innerHTML = "";
+        return;
+      }
+      if (pos.status === "closed") return blocked(t(lang, "explainClosed"));
+      if (pos.status === "liquidated") return blocked(t(lang, "explainLiquidated"));
+      if (pos.healthBp === "max") return blocked(t(lang, "simulatorNoDebt"));
+      startBp = Number(pos.healthBp);
     }
-    if (pos.healthBp === "max") {
-      result!.innerHTML = `<p class="text-dim">${t(lang, "simulatorNoDebt")}</p>`;
-      return;
-    }
-    const newHealthBp = simulateHealthAfterDrop(Number(pos.healthBp), dropPct);
+    slider!.disabled = false;
+
+    const liqDrop = pctDropToLiquidation(startBp);
+    liqMark!.hidden = liqDrop <= 0 || liqDrop > SIM_MAX_DROP;
+    liqMark!.style.left = `${(liqDrop / SIM_MAX_DROP) * 100}%`;
+
+    const newHealthBp = simulateHealthAfterDrop(startBp, dropPct);
     const newStatus = classifyFromHealthBp(newHealthBp);
-    const statusKey = STATUS_KEY[newStatus] ?? newStatus;
+    const startStatus = classifyFromHealthBp(startBp);
+    const liqLine = liqDrop <= 0 ? t(lang, "simAlreadyLiq") : t(lang, "simLiqAt").replace("{n}", liqDrop.toLocaleString(lang));
     result!.innerHTML = `
-      <div>
-        <div class="small text-dim">${t(lang, "simulatorResultHealth")}</div>
-        <div class="big" style="color:${healthColor(newStatus)}">${(newHealthBp / 100).toFixed(1)}%</div>
+      <div class="sim-compare">
+        <div>
+          <div class="small text-dim">${t(lang, "simCurrent")}</div>
+          <div class="big" style="color:${healthColor(startStatus)}">${(startBp / 100).toFixed(1)}%</div>
+        </div>
+        <div class="sim-arrow" aria-hidden="true">→</div>
+        <div>
+          <div class="small text-dim">${t(lang, "simulatorResultHealth")}</div>
+          <div class="big" style="color:${healthColor(newStatus)}">${(newHealthBp / 100).toFixed(1)}%</div>
+        </div>
       </div>
       <div>
         <div class="small text-dim">${t(lang, "simulatorResultStatus")}</div>
-        <span class="status-pill status-${newStatus}">${t(lang, statusKey)}</span>
-      </div>`;
+        <span class="status-pill status-${newStatus}">${t(lang, STATUS_KEY[newStatus] ?? newStatus)}</span>
+        <p class="small sim-explain">${t(lang, EXPLAIN_KEY[newStatus] ?? "")}</p>
+      </div>
+      <p class="small"><strong>${liqLine}</strong></p>
+      ${isHypo ? `<p class="small sim-hypo-note">${t(lang, "simHypoNote")}</p>` : ""}`;
   }
 
-  select.addEventListener("change", update);
+  select.addEventListener("change", () => {
+    slider.value = "0";
+    update();
+  });
   slider.addEventListener("input", update);
+  hypoInput.addEventListener("input", update);
   update();
 }
 

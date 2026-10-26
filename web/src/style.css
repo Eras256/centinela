@@ -207,8 +207,47 @@ select {
   padding: 8px;
   font-size: 13px;
 }
-.sim-result { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.sim-result { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
 .sim-result .big { font-size: 26px; font-weight: 700; }
+.sim-result p { margin: 0; }
+.sim-compare { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.sim-arrow { font-size: 22px; color: var(--text-dim); padding-bottom: 4px; }
+.sim-explain { color: var(--text-dim); margin-top: 6px !important; }
+.sim-hypo-note { color: var(--purple); }
+input[type="number"] {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+}
+input[type="range"]:disabled { opacity: 0.4; }
+.sim-scale { position: relative; height: 18px; margin: 2px 8px 0; }
+.sim-liq-mark {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 10px;
+  background: var(--red);
+}
+.sim-liq-mark > span {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--red);
+  white-space: nowrap;
+}
+.sim-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
 .sim-label-sim {
   display: inline-block;
   font-size: 11px;
