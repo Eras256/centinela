@@ -1,0 +1,23 @@
+{
+  "name": "centinela-scanner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Read-only liquidation monitor for Writz (testnet): scans positions, classifies health, pushes ntfy alerts on state change.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "scan": "node dist/cli.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "16.3.1",
+    "@writz/sdk": "0.1.2"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3",
+    "vitest": "2.1.8",
+    "@types/node": "22.10.5"
+  }
+}
