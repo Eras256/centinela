@@ -164,6 +164,17 @@ table.positions th { color: var(--text-dim); font-weight: 600; font-size: 12px; 
 .status-liquidatable, .status-liquidated { background: rgba(229,72,77,0.18); color: var(--red); }
 .status-closed { background: rgba(139,124,246,0.15); color: var(--purple); }
 
+.near-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--orange);
+  background: rgba(232, 169, 59, 0.15);
+}
+
 button.subscribe-btn {
   background: var(--accent);
   color: #07131f;

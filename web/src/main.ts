@@ -55,6 +55,14 @@ function healthBarPct(healthBp: string): number {
   return Math.max(4, Math.min(100, (n / 20_000) * 100)); // 200% fills the bar
 }
 
+function esc(value: unknown): string {
+  return String(value).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
+function healthText(p: { healthBp: string; healthDisplay: string }): string {
+  return p.healthBp === "max" ? t(lang, "healthNoDebt") : p.healthDisplay;
+}
+
 function truncateAddr(addr: string): string {
   return addr.length > 12 ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : addr;
 }
@@ -113,16 +121,7 @@ function renderHow(): string {
     <section id="how">
       <h2>${t(lang, "howTitle")}</h2>
       <p>${t(lang, "howBody")}</p>
-      <pre class="ascii">escaner (Node/TS) --&gt; Soroban RPC (get_position, get_health_ratio_bp, get_best_tip)
-      |
-      v
-data/positions.json, data/history.json  --(git push)--&gt;  este repo
-      |
-      v
-pagina estatica (este sitio)  --(fetch)--&gt;  raw.githubusercontent.com
-      |
-      v
-cambio de estado? --&gt; ntfy.sh/&lt;tema-de-la-posicion&gt; --&gt; tu telefono</pre>
+      <pre class="ascii">${esc(t(lang, "howDiagram"))}</pre>
       <h3 style="font-size:15px;margin-top:20px;">${t(lang, "primitivesTitle")}</h3>
       <p class="text-dim small">${t(lang, "primitivesBody")}</p>
     </section>`;
@@ -144,10 +143,10 @@ function renderPositionsTable(): string {
             <td>${fmtBtc(p.btcSatoshis)}</td>
             <td>
               <div class="health-bar"><span style="width:${healthBarPct(p.healthBp)}%;background:${healthColor(p.status)}"></span></div>
-              <div class="small text-dim">${p.healthDisplay} · ${fmtUsdc(p.usdcDebt)} USDC</div>
+              <div class="small text-dim">${esc(healthText(p))} · ${fmtUsdc(p.usdcDebt)} USDC</div>
             </td>
             <td><span class="status-pill status-${p.status}">${t(lang, statusKey)}</span></td>
-            <td>${p.blocksUntilLiquidationCutoff.toLocaleString()}${p.timelockNear ? " ⚠" : ""}</td>
+            <td>${p.blocksUntilLiquidationCutoff.toLocaleString(lang)}${p.timelockNear ? ` <span class="near-tag">${t(lang, "timelockNearShort")}</span>` : ""}</td>
             <td>${drop}</td>
             <td><button class="subscribe-btn" data-topic="${p.ntfyTopic}" type="button">${t(lang, "subscribeBtn")}</button></td>
           </tr>`;
@@ -176,13 +175,13 @@ function renderPositionsTable(): string {
         </table>
       </div>
       <p class="small text-dim" style="margin-top:8px;">${t(lang, "subscribeHint")}</p>
-      ${positions ? `<p class="small text-dim">writz-lend: <span class="mono">${positions.writzLendContractId}</span> · bitcoin-spv: <span class="mono">${positions.bitcoinSpvContractId}</span> · scanned: ${new Date(positions.scannedAt).toLocaleString(lang)}</p>` : ""}
+      ${positions ? `<p class="small text-dim">writz-lend: <span class="mono">${esc(positions.writzLendContractId)}</span> · bitcoin-spv: <span class="mono">${esc(positions.bitcoinSpvContractId)}</span> · ${t(lang, "scannedAt")}: ${esc(new Date(positions.scannedAt).toLocaleString(lang))}</p>` : ""}
     </section>`;
 }
 
 function renderSimulator(): string {
   const rows = positions?.positions ?? [];
-  const options = rows.map((p) => `<option value="${p.txidInternal}">${p.txidDisplay.slice(0, 14)}... (${p.healthDisplay})</option>`).join("");
+  const options = rows.map((p) => `<option value="${esc(p.txidInternal)}">${esc(p.txidDisplay.slice(0, 14))}... (${esc(healthText(p))})</option>`).join("");
   return `
     <section id="simulator">
       <h2><span class="sim-label-sim">SIM</span> ${t(lang, "simulatorTitle")}</h2>
