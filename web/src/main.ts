@@ -30,6 +30,14 @@ let lang: Lang = getLang();
 let positions: ScanSummary | null = null;
 let history: HistoryEntry[] = [];
 
+type Route = { kind: "home" } | { kind: "position"; id: string };
+
+function getRoute(): Route {
+  const raw = decodeURIComponent(location.hash.slice(1));
+  const match = raw.match(/^position\/(.+)$/);
+  return match ? { kind: "position", id: match[1] } : { kind: "home" };
+}
+
 async function fetchJson<T>(path: string): Promise<T> {
   try {
     const res = await fetch(`${REPO_RAW_BASE}/${path}`, { cache: "no-store" });
@@ -67,7 +75,20 @@ function fmtUsdc(stroops: string): string {
   return (Number(stroops) / 10_000_000).toFixed(2);
 }
 
-function renderHeader(): string {
+function renderHeader(route: Route): string {
+  const nav =
+    route.kind === "home"
+      ? `
+        <nav class="toc">
+          <a href="#problem">${t(lang, "navProblem")}</a>
+          <a href="#how">${t(lang, "navHow")}</a>
+          <a href="#positions">${t(lang, "navPositions")}</a>
+          <a href="#simulator">${t(lang, "navSimulator")}</a>
+          <a href="#log">${t(lang, "navLog")}</a>
+          <a href="#faq">${t(lang, "navFaq")}</a>
+          <a href="#limits">${t(lang, "navLimits")}</a>
+        </nav>`
+      : "";
   return `
     <header class="top">
       <div class="wrap">
@@ -79,15 +100,7 @@ function renderHeader(): string {
           <button class="lang-toggle" id="lang-toggle" type="button">${t(lang, "langToggle")}</button>
         </div>
         <p class="tagline">${t(lang, "tagline")}</p>
-        <nav class="toc">
-          <a href="#problem">${t(lang, "navProblem")}</a>
-          <a href="#how">${t(lang, "navHow")}</a>
-          <a href="#positions">${t(lang, "navPositions")}</a>
-          <a href="#simulator">${t(lang, "navSimulator")}</a>
-          <a href="#log">${t(lang, "navLog")}</a>
-          <a href="#faq">${t(lang, "navFaq")}</a>
-          <a href="#limits">${t(lang, "navLimits")}</a>
-        </nav>
+        ${nav}
       </div>
     </header>`;
 }
@@ -150,10 +163,11 @@ function renderPositionsTable(): string {
             <td>${p.blocksUntilLiquidationCutoff.toLocaleString()}${p.timelockNear ? " ⚠" : ""}</td>
             <td>${drop}</td>
             <td><button class="subscribe-btn" data-topic="${p.ntfyTopic}" type="button">${t(lang, "subscribeBtn")}</button></td>
+            <td><a class="detail-link" href="#position/${encodeURIComponent(p.txidInternal)}">${t(lang, "viewDetail")}</a></td>
           </tr>`;
         })
         .join("")
-    : `<tr><td colspan="7" class="text-dim">${t(lang, "noPositions")}</td></tr>`;
+    : `<tr><td colspan="9" class="text-dim">${t(lang, "noPositions")}</td></tr>`;
 
   return `
     <section id="positions">
@@ -170,6 +184,7 @@ function renderPositionsTable(): string {
               <th>${t(lang, "colTimelock")}</th>
               <th>${t(lang, "colDrop")}</th>
               <th>${t(lang, "colSubscribe")}</th>
+              <th>${t(lang, "colDetail")}</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -180,9 +195,87 @@ function renderPositionsTable(): string {
     </section>`;
 }
 
-function renderSimulator(): string {
+function renderPositionDetail(id: string): string {
+  const backLink = `<a class="back-link" href="#">${t(lang, "backToPositions")}</a>`;
+  const pos = positions?.positions.find((p) => p.txidInternal === id);
+  if (!pos) {
+    return `
+      <section id="detail">
+        ${backLink}
+        <div class="panel" style="margin-top:16px;">
+          <h2>${t(lang, "notFoundTitle")}</h2>
+          <p class="text-dim">${t(lang, "notFoundBody")}</p>
+        </div>
+      </section>`;
+  }
+  const statusKey = STATUS_KEY[pos.status] ?? pos.status;
+  const drop = pos.pctDropToLiquidation === null ? "-" : `${pos.pctDropToLiquidation}%`;
+  return `
+    <section id="detail">
+      ${backLink}
+      <div class="detail-head">
+        <h2 class="mono">${pos.txidDisplay.slice(0, 18)}...</h2>
+        <span class="status-pill status-${pos.status}">${t(lang, statusKey)}</span>
+      </div>
+      <p class="small text-dim">${t(lang, "detailUpdatedLabel")}: ${new Date(pos.updatedAt).toLocaleString(lang)}</p>
+      <div class="panel detail-grid">
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "colTxid")}</div>
+          <div class="mono"><a href="https://mempool.space/signet/tx/${pos.txidDisplay}" target="_blank" rel="noopener">${pos.txidDisplay}</a></div>
+        </div>
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "colDepositor")}</div>
+          <div class="mono">${pos.depositor}</div>
+        </div>
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "colBtc")}</div>
+          <div>${fmtBtc(pos.btcSatoshis)} BTC</div>
+        </div>
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "detailDebtLabel")}</div>
+          <div>${fmtUsdc(pos.usdcDebt)} USDC</div>
+        </div>
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "colHealth")}</div>
+          <div>
+            <div class="health-bar"><span style="width:${healthBarPct(pos.healthBp)}%;background:${healthColor(pos.status)}"></span></div>
+            <div class="small text-dim">${pos.healthDisplay}</div>
+          </div>
+        </div>
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "colTimelock")}</div>
+          <div>${pos.blocksUntilLiquidationCutoff.toLocaleString()}${pos.timelockNear ? " ⚠" : ""}</div>
+        </div>
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "colDrop")}</div>
+          <div>${drop}</div>
+        </div>
+        <div class="detail-stat">
+          <div class="small text-dim">${t(lang, "detailNtfyLabel")}</div>
+          <div><button class="subscribe-btn" data-topic="${pos.ntfyTopic}" type="button">${t(lang, "subscribeBtn")}</button></div>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button
+          class="copy-link-btn"
+          id="copy-link-btn"
+          type="button"
+          data-default-label="${t(lang, "copyLinkBtn")}"
+          data-copied-label="${t(lang, "copyLinkCopied")}"
+        >${t(lang, "copyLinkBtn")}</button>
+      </div>
+      ${renderSimulator(pos.txidInternal)}
+    </section>`;
+}
+
+function renderSimulator(selectedId?: string): string {
   const rows = positions?.positions ?? [];
-  const options = rows.map((p) => `<option value="${p.txidInternal}">${p.txidDisplay.slice(0, 14)}... (${p.healthDisplay})</option>`).join("");
+  const options = rows
+    .map((p) => {
+      const selected = selectedId && p.txidInternal === selectedId ? " selected" : "";
+      return `<option value="${p.txidInternal}"${selected}>${p.txidDisplay.slice(0, 14)}... (${p.healthDisplay})</option>`;
+    })
+    .join("");
   return `
     <section id="simulator">
       <h2><span class="sim-label-sim">SIM</span> ${t(lang, "simulatorTitle")}</h2>
@@ -257,7 +350,7 @@ function renderFooter(): string {
     </footer>`;
 }
 
-function wireSimulator() {
+function wireSimulator(opts: { syncHash?: boolean } = {}) {
   const select = document.getElementById("sim-position") as HTMLSelectElement | null;
   const slider = document.getElementById("sim-drop") as HTMLInputElement | null;
   const valueLabel = document.getElementById("sim-drop-value");
@@ -272,27 +365,61 @@ function wireSimulator() {
       result!.innerHTML = "";
       return;
     }
+    const currentStatusKey = STATUS_KEY[pos.status] ?? pos.status;
+    const currentBlock = `
+      <div class="sim-stat">
+        <div class="small text-dim">${t(lang, "simulatorCurrentHealth")}</div>
+        <div class="big" style="color:${healthColor(pos.status)}">${pos.healthDisplay}</div>
+        <span class="status-pill status-${pos.status}">${t(lang, currentStatusKey)}</span>
+      </div>`;
     if (pos.healthBp === "max") {
-      result!.innerHTML = `<p class="text-dim">${t(lang, "simulatorNoDebt")}</p>`;
+      result!.innerHTML = `
+        <div class="sim-compare">${currentBlock}</div>
+        <p class="text-dim small" style="margin-top:10px;">${t(lang, "simulatorNoDebt")}</p>`;
       return;
     }
     const newHealthBp = simulateHealthAfterDrop(Number(pos.healthBp), dropPct);
     const newStatus = classifyFromHealthBp(newHealthBp);
     const statusKey = STATUS_KEY[newStatus] ?? newStatus;
     result!.innerHTML = `
-      <div>
-        <div class="small text-dim">${t(lang, "simulatorResultHealth")}</div>
-        <div class="big" style="color:${healthColor(newStatus)}">${(newHealthBp / 100).toFixed(1)}%</div>
-      </div>
-      <div>
-        <div class="small text-dim">${t(lang, "simulatorResultStatus")}</div>
-        <span class="status-pill status-${newStatus}">${t(lang, statusKey)}</span>
+      <div class="sim-compare">
+        ${currentBlock}
+        <div class="sim-arrow" aria-hidden="true">-&gt;</div>
+        <div class="sim-stat">
+          <div class="small text-dim">${t(lang, "simulatorResultHealth")}</div>
+          <div class="big" style="color:${healthColor(newStatus)}">${(newHealthBp / 100).toFixed(1)}%</div>
+          <span class="status-pill status-${newStatus}">${t(lang, statusKey)}</span>
+        </div>
       </div>`;
   }
 
-  select.addEventListener("change", update);
+  select.addEventListener("change", () => {
+    if (opts.syncHash) {
+      location.hash = `position/${encodeURIComponent(select!.value)}`;
+      return;
+    }
+    update();
+  });
   slider.addEventListener("input", update);
   update();
+}
+
+function wireCopyLinkButton() {
+  const btn = document.getElementById("copy-link-btn") as HTMLButtonElement | null;
+  if (!btn) return;
+  btn.addEventListener("click", async () => {
+    const url = `${location.origin}${location.pathname}${location.hash}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      /* clipboard blocked (private mode, insecure context): nothing more to do */
+    }
+    const defaultLabel = btn.dataset.defaultLabel ?? btn.textContent ?? "";
+    btn.textContent = btn.dataset.copiedLabel ?? defaultLabel;
+    setTimeout(() => {
+      btn.textContent = defaultLabel;
+    }, 1500);
+  });
 }
 
 function wireSubscribeButtons() {
@@ -316,8 +443,22 @@ function wireLangToggle() {
 function render() {
   const app = document.getElementById("app");
   if (!app) return;
+  const route = getRoute();
+  if (route.kind === "position") {
+    app.innerHTML = `
+      ${renderHeader(route)}
+      <main class="wrap">
+        ${renderPositionDetail(route.id)}
+      </main>
+      ${renderFooter()}`;
+    wireLangToggle();
+    wireSubscribeButtons();
+    wireCopyLinkButton();
+    wireSimulator({ syncHash: true });
+    return;
+  }
   app.innerHTML = `
-    ${renderHeader()}
+    ${renderHeader(route)}
     <main class="wrap">
       ${renderProblem()}
       ${renderHow()}
@@ -332,6 +473,8 @@ function render() {
   wireSubscribeButtons();
   wireSimulator();
 }
+
+window.addEventListener("hashchange", render);
 
 async function boot() {
   document.documentElement.lang = lang;
