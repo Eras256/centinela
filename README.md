@@ -7,6 +7,8 @@ if it happens. It never signs, moves, or holds funds.
 
 Built during the Pura Vida Ideathon (Genesis track), 2026-10-26.
 
+**Live:** [centinela-writz.vercel.app](https://centinela-writz.vercel.app)
+
 ## The problem
 
 Writz lets you lock native BTC on Bitcoin and borrow USDC on Stellar. If a
@@ -141,6 +143,37 @@ fails with `Error(Contract, #8)` (`PositionNotFound`); reversing the bytes
 first returns the real position. `src/txid-byteorder.test.ts` pins this
 against the documented example.
 
+## Deploying
+
+The page ([centinela-writz.vercel.app](https://centinela-writz.vercel.app))
+is deployed with the Vercel CLI only - **never** via Vercel's Git
+integration. Reason: `.github/workflows/scan.yml` commits to `main` as
+`centinela-bot` roughly every 10 minutes, and Vercel's Git integration
+either ignores commits from an author it doesn't recognize as a
+collaborator or, worse, tries to redeploy on every single one - neither is
+what we want, since the page itself doesn't need a redeploy when only the
+data changes (it fetches `data/positions.json` live from
+`raw.githubusercontent.com` at render time - see "How it works" above). A
+redeploy is only needed when `web/` itself changes.
+
+```bash
+./scripts/deploy-vercel.sh
+```
+
+does exactly what it says: checks `vercel whoami`, builds `web/` with
+`BASE_PATH=/` (Vercel serves from the domain root, unlike the GitHub Pages
+build which serves from `/centinela/`), links `web/dist` to the
+`centinela-writz` Vercel project, and deploys to production. The project is
+named `centinela-writz` rather than the shorter `centinela` because that
+alias was already claimed by an unrelated project when this was first
+deployed - see the script's own comment for the full story.
+
+`.github/workflows/pages.yml` (GitHub Pages) still runs on every push to
+`web/**` as a silent fallback at `eras256.github.io/centinela` - it isn't
+linked anywhere in this README or the repo's homepage, Vercel is the
+canonical live link, but the Pages build is a free way to keep a second
+copy warm in case Vercel ever has an outage.
+
 ## What was built during the event (2026-10-26)
 
 - `src/thresholds.ts` - status classification (`no-debt` / `healthy` /
@@ -217,12 +250,13 @@ against the documented example.
   own scheduling slack) - not a scope cut. The Fly `Dockerfile`/`fly.toml`
   are still included in `worker/` for whoever wants to run the original
   design; see `REPORT.md` for exactly what would need to happen to switch to it.
-- **The status page's live deploy target changed for the same kind of
-  reason.** `vercel whoami` returned an account (`vaiosx01`) other than the
-  one specified for this build (`diximan4-1243`), and the build instructions
-  are explicit: stop rather than deploy under the wrong account. GitHub
-  Pages, served from this same correctly-authenticated repo, is the
-  substitute; see `REPORT.md`.
+- **The status page's Vercel deploy was briefly blocked, then fixed.**
+  Early in this build, `vercel whoami` returned an account (`vaiosx01`)
+  other than the one specified (`diximan4-1243`), so the page shipped to
+  GitHub Pages instead (that deploy is still running, see "Deploying"
+  above). By the time the page moved to Vercel, `vercel whoami` correctly
+  showed `diximan4-1243` and the deploy went ahead - see `REPORT.md` for
+  the full timeline.
 - **Not financial advice.** Centinela only observes and notifies. It never
   signs, moves, or custodies funds, and a notification is not a guarantee -
   always check the position yourself before acting on an alert.
