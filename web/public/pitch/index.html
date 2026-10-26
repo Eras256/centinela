@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Centinela - pitch deck. Pura Vida Ideathon, track Genesis." />
+<title>Centinela - pitch</title>
+<style>
+  :root {
+    --bg: #0b1016;
+    --panel: #121a24;
+    --panel-border: #22303f;
+    --text: #e7edf3;
+    --text-dim: #9fb0c0;
+    --accent: #4fb3ff;
+    --green: #35c37d;
+    --orange: #e8a93b;
+    --red: #e5484d;
+    --purple: #8b7cf6;
+  }
+  * { box-sizing: border-box; min-width: 0; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  body.scrollable { overflow-y: auto; overflow-x: hidden; }
+
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    z-index: 50;
+    background: linear-gradient(to bottom, rgba(11,16,22,0.92), rgba(11,16,22,0));
+    pointer-events: none;
+  }
+  .topbar .mark { font-weight: 700; font-size: 15px; letter-spacing: 0.02em; }
+  .topbar .mark .dot { color: var(--accent); }
+  .topbar .counter { font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  .progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    z-index: 60;
+    background: rgba(255,255,255,0.06);
+  }
+  .progress > span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.35s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .progress > span { transition: none; }
+  }
+
+  .deck {
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 90px 10vw 70px;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    z-index: 2;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 0.15s linear; transform: none; }
+  }
+
+  .kicker {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: rgba(79, 179, 255, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(79, 179, 255, 0.35);
+    margin-bottom: 22px;
+  }
+  h1.heading {
+    font-size: clamp(32px, 5vw, 58px);
+    line-height: 1.08;
+    margin: 0 0 22px;
+    max-width: 16ch;
+  }
+  p.lede {
+    font-size: clamp(16px, 1.6vw, 22px);
+    color: var(--text-dim);
+    max-width: 58ch;
+    line-height: 1.5;
+    margin: 0 0 28px;
+  }
+  .bullets {
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0;
+    max-width: 62ch;
+  }
+  .bullets li {
+    position: relative;
+    padding-left: 26px;
+    margin-bottom: 14px;
+    font-size: clamp(15px, 1.35vw, 19px);
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .bullets li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 9px;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+  .steps {
+    list-style: none;
+    counter-reset: step;
+    margin: 0 0 20px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 16px 32px;
+    max-width: 72ch;
+  }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 44px;
+    font-size: clamp(14px, 1.25vw, 17px);
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0; top: -2px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  blockquote.quote {
+    margin: 0 0 24px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--red);
+    background: rgba(229,72,77,0.08);
+    border-radius: 6px;
+    font-size: clamp(15px, 1.4vw, 19px);
+    max-width: 62ch;
+    line-height: 1.5;
+  }
+  .quote-src { font-size: 12px; color: var(--text-dim); margin: 0 0 24px; }
+
+  .stat-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 6px 0 24px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    min-width: 150px;
+  }
+  .stat .n { font-size: clamp(22px, 2.4vw, 30px); font-weight: 700; color: var(--green); }
+  .stat .l { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  .footnote {
+    font-size: 13px;
+    color: var(--text-dim);
+    max-width: 60ch;
+  }
+  .footnote.close {
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  code.mono, span.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.92em;
+    color: var(--text-dim);
+  }
+
+  /* radar motif - static echo of the live hero's concentric rings */
+  .radar {
+    position: absolute;
+    right: 4vw;
+    bottom: 6vh;
+    width: min(32vw, 360px);
+    height: min(32vw, 360px);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .radar circle { fill: none; }
+  .radar .ring-outer { stroke: var(--panel-border); stroke-width: 1; }
+  .radar .ring-150 { stroke: var(--green); stroke-opacity: 0.45; stroke-width: 1; }
+  .radar .ring-135 { stroke: var(--orange); stroke-opacity: 0.5; stroke-width: 1; }
+  .radar .ring-120 { stroke: var(--red); stroke-opacity: 0.55; stroke-width: 1; }
+  .radar .blip { fill: var(--accent); }
+  .radar .sweep {
+    transform-origin: 200px 200px;
+    animation: sweep 6s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .radar .sweep { animation: none; }
+  }
+  @keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* nav hints */
+  .nav-hint {
+    position: fixed;
+    bottom: 18px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.03em;
+    z-index: 50;
+    text-align: center;
+    pointer-events: none;
+  }
+  .nav-hint kbd {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: inherit;
+  }
+
+  .deck, .slide { cursor: pointer; }
+  .notes-overlay, .notes-overlay * { cursor: auto; }
+
+  /* notes overlay */
+  .notes-overlay {
+    position: fixed;
+    inset: auto 0 0 0;
+    max-height: 42vh;
+    overflow-y: auto;
+    background: rgba(6,10,15,0.96);
+    border-top: 1px solid var(--panel-border);
+    padding: 18px 10vw;
+    z-index: 80;
+    display: none;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .notes-overlay.visible { display: block; }
+  .notes-overlay .notes-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 760px) {
+    body { overflow-y: auto; }
+    .slide {
+      position: relative;
+      min-height: 100vh;
+      padding: 90px 6vw 60px;
+      opacity: 1;
+      transform: none;
+      display: none;
+    }
+    .slide.active { display: flex; }
+    .steps { grid-template-columns: 1fr; }
+    .radar { position: static; margin-top: 20px; width: 70vw; height: 70vw; opacity: 0.4; }
+    .nav-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress"><span id="progress-bar" style="width:16.6%"></span></div>
+<div class="topbar">
+  <div class="mark">Centinela<span class="dot">.</span></div>
+  <div class="counter" id="counter">1 / 6</div>
+</div>
+<div class="deck" id="deck">
+
+  <section class="slide" data-slide="1" aria-label="Portada">
+    <span class="kicker">Pura Vida Ideathon · Track Genesis</span>
+    <h1 class="heading">Centinela</h1>
+    <p class="lede">Te avisa antes de que pierdas tu Bitcoin, no después.</p>
+    <p class="footnote">Giovanny Amador &amp; Monserrat Mendoza · Costa Rica · 23-26 oct 2026</p>
+    <svg class="radar" viewBox="0 0 400 400" aria-hidden="true">
+      <circle class="ring-outer" cx="200" cy="200" r="178" />
+      <circle class="ring-150" cx="200" cy="200" r="128" />
+      <circle class="ring-135" cx="200" cy="200" r="84" />
+      <circle class="ring-120" cx="200" cy="200" r="40" />
+      <g class="sweep">
+        <line x1="200" y1="200" x2="200" y2="22" stroke="var(--accent)" stroke-width="1" stroke-opacity="0.5" />
+      </g>
+      <circle class="blip" cx="300" cy="130" r="5" />
+    </svg>
+  </section>
+
+  <section class="slide" data-slide="2" aria-label="El problema">
+    <span class="kicker">El problema</span>
+    <h1 class="heading">Hoy, nadie te avisa</h1>
+    <blockquote class="quote">
+      "Hoy, si te liquidan, te enteras solo porque notas que tu BTC desapareció.
+      Sin notificación, sin explicación."
+    </blockquote>
+    <p class="quote-src">- especificación de UX de Writz (<span class="mono">liquidation-notification-spec.md</span>), estado: "mecanismo de detección aún no implementado"</p>
+    <ul class="bullets">
+      <li>Writz: bloqueas BTC nativo en Bitcoin, pides prestado USDC en Stellar.</li>
+      <li>Si la salud del préstamo baja de 120%, un keeper paga tu deuda y se queda con tu BTC.</li>
+      <li>Tampoco hay ningún aviso ANTES de llegar ahí.</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-slide="3" aria-label="La solución">
+    <span class="kicker">La solución</span>
+    <h1 class="heading">Centinela: un vigía que lee la cadena</h1>
+    <ol class="steps">
+      <li>Cada pocos minutos, lee cada posición de Writz directo del contrato.</li>
+      <li>Calcula la salud y la compara con los umbrales exactos: 150%, 135%, 120%.</li>
+      <li>Si el estado cambió, manda un aviso push.</li>
+      <li>Antes de pedir prestado: simula - ¿a qué precio de Bitcoin me liquidan?</li>
+    </ol>
+    <p class="footnote">Lectura, cálculo, aviso, simulación. Nunca firma, nunca mueve fondos.</p>
+  </section>
+
+  <section class="slide" data-slide="4" aria-label="Por qué Stellar">
+    <span class="kicker">Por qué Stellar</span>
+    <h1 class="heading">Esto solo es posible en Stellar</h1>
+    <ul class="bullets">
+      <li>El escáner lee dos contratos Soroban: <span class="mono">writz-lend</span> y <span class="mono">bitcoin-spv</span>, que verifica Bitcoin directamente en Stellar.</li>
+      <li>Las lecturas son simuladas: sin firma, sin cuenta, sin gas.</li>
+      <li>Sin eso, no habría forma de vigilar nada sin pagar una transacción solo para ver un número.</li>
+      <li>Usamos el SDK oficial de Writz en vez de reinventar los umbrales.</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-slide="5" aria-label="A quién le sirve">
+    <span class="kicker">A quién le sirve</span>
+    <h1 class="heading">Dos públicos, un vigía</h1>
+    <ul class="bullets">
+      <li>Quien ya pidió prestado en Writz: se suscribe y recibe el aviso a tiempo.</li>
+      <li>Quien está por pedir prestado: simula antes de arriesgarse.</li>
+    </ul>
+    <div class="stat-row">
+      <div class="stat"><div class="n">9</div><div class="l">depositantes únicos<br/>(API de Writz)</div></div>
+    </div>
+    <p class="footnote">Writz ya construyó el protocolo; nadie había construido la capa de avisos que su propia especificación pide. Hay más gente expuesta a este riesgo de la que alcanzamos a ver hoy.</p>
+  </section>
+
+  <section class="slide" data-slide="6" aria-label="Ya funciona">
+    <span class="kicker">Ya funciona</span>
+    <h1 class="heading">No es una idea, ya está corriendo</h1>
+    <div class="stat-row">
+      <div class="stat"><div class="n">36/36</div><div class="l">pruebas unitarias pasan</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">contratos reales en testnet</div></div>
+      <div class="stat"><div class="n">10 min</div><div class="l">intervalo de revisión</div></div>
+    </div>
+    <p class="lede">Próximos pasos: ampliar la búsqueda de posiciones, avisos por Telegram, y leer el precio en dólares.</p>
+    <p class="footnote mono">centinela-writz.vercel.app</p>
+    <p class="footnote close">Pitch grabado: 3 min · Demo: en vivo abajo.</p>
+  </section>
+
+</div>
+
+<div class="nav-hint">
+  <kbd>&larr;</kbd> <kbd>&rarr;</kbd> / <kbd>espacio</kbd> avanzar &middot; <kbd>N</kbd> notas &middot; <kbd>F</kbd> pantalla completa
+</div>
+
+<div class="notes-overlay" id="notes-overlay">
+  <div class="notes-label">Notas del orador</div>
+  <div id="notes-text"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var NOTES = {
+    1: "Hola, somos Giovanny Amador y Monserrat Mendoza, desde Costa Rica. Este es Centinela, para el track Genesis.\nCentinela te avisa antes de que pierdas tu Bitcoin, no después.",
+    2: "Writz es un protocolo de Costa Rica: bloqueas BTC nativo en Bitcoin y pides prestado USDC en Stellar. Si la salud del préstamo baja de 120%, un keeper paga tu deuda y se queda con tu BTC.\nLa propia especificación de Writz lo dice: hoy, si te liquidan, te enteras solo porque notas que tu BTC desapareció. Sin notificación, sin explicación. Tampoco hay ningún aviso antes de llegar ahí.",
+    3: "Centinela es un vigía que lee la cadena. Cada pocos minutos lee cada posición de Writz, calcula su salud y la compara con los umbrales exactos del contrato: 150, 135 y 120 por ciento.\nSi el estado cambió, manda un aviso. Y antes de pedir prestado, puedes simular: ¿a qué precio de Bitcoin me liquidan?",
+    4: "Esto es posible por Stellar. El escáner lee dos contratos de Soroban: writz-lend y bitcoin-spv, que verifica Bitcoin directamente en Stellar.\nLas lecturas son simuladas: sin firma, sin cuenta, sin gas. Sin eso no habría forma de vigilar nada sin pagar una transacción solo para ver un número. Y usamos el SDK oficial de Writz en vez de reinventar los umbrales.",
+    5: "Le sirve a quien ya pidió prestado en Writz, para que se suscriba y reciba el aviso a tiempo. Y a quien está por pedir prestado, para que simule antes de arriesgarse.\nWritz ya construyó el protocolo; nadie había construido la capa de avisos que su propia especificación pide. La API de Writz reporta nueve depositantes únicos en total, así que hay más gente expuesta a este riesgo de la que alcanzamos a ver hoy.",
+    6: "Y ya está corriendo: 36 de 36 pruebas pasan, lee dos contratos reales en testnet, revisa cada diez minutos. Los próximos pasos son ampliar la búsqueda de posiciones, avisos por Telegram y leer el precio en dólares. Ahora les mostramos la demo en vivo."
+  };
+
+  var TOTAL = 6;
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var counterEl = document.getElementById("counter");
+  var progressEl = document.getElementById("progress-bar");
+  var notesOverlay = document.getElementById("notes-overlay");
+  var notesText = document.getElementById("notes-text");
+  var current = 1;
+  var notesVisible = false;
+
+  function parseHash() {
+    var n = parseInt((location.hash || "").replace("#", ""), 10);
+    if (isNaN(n) || n < 1 || n > TOTAL) return 1;
+    return n;
+  }
+
+  function render() {
+    slides.forEach(function (s) {
+      var n = parseInt(s.getAttribute("data-slide"), 10);
+      s.classList.toggle("active", n === current);
+    });
+    counterEl.textContent = current + " / " + TOTAL;
+    progressEl.style.width = (current / TOTAL * 100) + "%";
+    notesText.textContent = NOTES[current] || "";
+    try { history.replaceState(null, "", "#" + current); } catch (e) {}
+  }
+
+  function go(n) {
+    current = Math.max(1, Math.min(TOTAL, n));
+    render();
+  }
+
+  function next() { go(current + 1); }
+  function prev() { go(current - 1); }
+
+  window.addEventListener("hashchange", function () {
+    var n = parseHash();
+    if (n !== current) { current = n; render(); }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+      e.preventDefault();
+      next();
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault();
+      prev();
+    } else if (e.key === "n" || e.key === "N") {
+      notesVisible = !notesVisible;
+      notesOverlay.classList.toggle("visible", notesVisible);
+    } else if (e.key === "f" || e.key === "F") {
+      toggleFullscreen();
+    } else if (e.key === "Home") {
+      go(1);
+    } else if (e.key === "End") {
+      go(TOTAL);
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    if (notesVisible && notesOverlay.contains(e.target)) return; // let notes text be read/selected, not navigate
+    var w = window.innerWidth;
+    if (e.clientX < w * 0.35) prev();
+    else next();
+  });
+
+  // touch swipe
+  var touchStartX = null, touchStartY = null;
+  document.addEventListener("touchstart", function (e) {
+    if (!e.touches || !e.touches[0]) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener("touchend", function (e) {
+    if (touchStartX === null) return;
+    var touch = (e.changedTouches && e.changedTouches[0]) || null;
+    if (!touch) return;
+    var dx = touch.clientX - touchStartX;
+    var dy = touch.clientY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) next(); else prev();
+    }
+    touchStartX = null; touchStartY = null;
+  }, { passive: true });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      (document.documentElement.requestFullscreen || function(){}).call(document.documentElement);
+    } else {
+      (document.exitFullscreen || function(){}).call(document);
+    }
+  }
+
+  current = parseHash();
+  render();
+})();
+</script>
+</body>
+</html>
