@@ -134,8 +134,29 @@ table.positions th, table.positions td {
   border-bottom: 1px solid var(--panel-border);
   white-space: nowrap;
 }
-table.positions th { color: var(--text-dim); font-weight: 600; font-size: 12px; }
+table.positions th { color: var(--text-dim); font-weight: 600; font-size: 12px; white-space: normal; vertical-align: bottom; }
 .table-scroll { overflow-x: auto; }
+
+ul.position-cards { display: none; list-style: none; margin: 0; padding: 0; }
+@media (max-width: 640px) {
+  ul.position-cards { display: flex; flex-direction: column; gap: 10px; }
+  #positions .table-scroll { display: none; }
+}
+.pc-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.pc-head a { font-size: 14px; }
+.health-bar.wide { width: 100%; }
+dl.pc-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+dl.pc-facts dt { font-size: 11px; color: var(--text-dim); }
+dl.pc-facts dd { margin: 0; }
+.pc-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pc-detail { font-size: 14px; text-decoration: none; padding: 8px 0; }
+button.subscribe-btn { min-height: 36px; }
 
 .health-bar {
   position: relative;

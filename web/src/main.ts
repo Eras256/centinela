@@ -75,6 +75,10 @@ function healthText(p: { healthBp: string; healthDisplay: string }): string {
   return p.healthBp === "max" ? t(lang, "healthNoDebt") : p.healthDisplay;
 }
 
+function fmtPctBp(bp: number): string {
+  return `${(bp / 100).toLocaleString(lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+}
+
 function truncateAddr(addr: string): string {
   return addr.length > 12 ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : addr;
 }
@@ -166,9 +170,35 @@ function renderPositionsTable(): string {
         .join("")
     : `<tr><td colspan="7" class="text-dim">${t(lang, "noPositions")}</td></tr>`;
 
+  const cards = rows
+    .map((p) => {
+      const drop = p.pctDropToLiquidation === null ? "-" : `${esc(p.pctDropToLiquidation)}%`;
+      return `
+      <li class="panel position-card">
+        <div class="pc-head">
+          <a class="mono" href="${positionHref(p)}">${esc(p.txidDisplay.slice(0, 10))}...</a>
+          <span class="status-pill status-${esc(p.status)}">${t(lang, STATUS_KEY[p.status] ?? p.status)}</span>
+        </div>
+        <div class="health-bar wide"><span style="width:${healthBarPct(p.healthBp)}%;background:${healthColor(p.status)}"></span></div>
+        <dl class="pc-facts">
+          <div><dt>${t(lang, "colHealth")}</dt><dd>${esc(healthText(p))}</dd></div>
+          <div><dt>${t(lang, "colBtc")}</dt><dd>${fmtBtc(p.btcSatoshis)}</dd></div>
+          <div><dt>${t(lang, "detailDebt")}</dt><dd>${fmtUsdc(p.usdcDebt)} USDC</dd></div>
+          <div><dt>${t(lang, "colDrop")}</dt><dd>${drop}</dd></div>
+          <div><dt>${t(lang, "colTimelock")}</dt><dd>${p.blocksUntilLiquidationCutoff.toLocaleString(lang)}${p.timelockNear ? ` <span class="near-tag">${t(lang, "timelockNearShort")}</span>` : ""}</dd></div>
+        </dl>
+        <div class="pc-actions">
+          <a class="pc-detail" href="${positionHref(p)}">${t(lang, "viewDetail")} →</a>
+          <button class="subscribe-btn" data-topic="${esc(p.ntfyTopic)}" type="button">${t(lang, "subscribeBtn")}</button>
+        </div>
+      </li>`;
+    })
+    .join("");
+
   return `
     <section id="positions">
       <h2>${t(lang, "positionsTitle")}</h2>
+      <ul class="position-cards">${cards || `<li class="panel text-dim">${t(lang, "noPositions")}</li>`}</ul>
       <div class="panel table-scroll">
         <table class="positions">
           <thead>
@@ -426,12 +456,12 @@ function wireSimulator() {
       <div class="sim-compare">
         <div>
           <div class="small text-dim">${t(lang, "simCurrent")}</div>
-          <div class="big" style="color:${healthColor(startStatus)}">${(startBp / 100).toFixed(1)}%</div>
+          <div class="big" style="color:${healthColor(startStatus)}">${fmtPctBp(startBp)}</div>
         </div>
         <div class="sim-arrow" aria-hidden="true">→</div>
         <div>
           <div class="small text-dim">${t(lang, "simulatorResultHealth")}</div>
-          <div class="big" style="color:${healthColor(newStatus)}">${(newHealthBp / 100).toFixed(1)}%</div>
+          <div class="big" style="color:${healthColor(newStatus)}">${fmtPctBp(newHealthBp)}</div>
         </div>
       </div>
       <div>
