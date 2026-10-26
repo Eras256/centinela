@@ -73,8 +73,9 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     faqA4: "Cualquiera que tenga el enlace del tema de ntfy. Los temas son cadenas aleatorias largas, no secuenciales, pero ntfy no tiene control de acceso en temas gratuitos - no pongas información sensible ahí.",
     limitsTitle: "Límites honestos",
     limitsBody:
-      "Testnet únicamente. Pocas posiciones, casi todas sanas. No leemos el oráculo Reflector directamente - ver el FAQ. Los temas de ntfy son públicos por diseño, aunque difíciles de adivinar. Esto no es asesoría financiera: Centinela solo observa y avisa, nunca es una garantía.",
-    footerAiNote: "Construido con ayuda de un agente de IA (Claude) durante el evento.",
+      "Testnet únicamente. Hoy el escáner solo conoce una posición, la documentada por Writz, y está cerrada. El contrato reporta unos 3 USDC prestados (26-oct-2026), así que hay al menos una posición abierta que todavía no descubrimos: encontrarla es el siguiente paso. No leemos el oráculo Reflector directamente - ver el FAQ. Los temas de ntfy son públicos por diseño, aunque difíciles de adivinar. Esto no es asesoría financiera: Centinela solo observa y avisa, nunca es una garantía.",
+    footerAiNote: "Giovanny Amador y Monserrat Mendoza · Pura Vida Ideathon 2026 (Genesis). Construido con ayuda de un agente de IA (Claude) durante el evento.",
+    logDetected: "detectada:",
     langToggle: "English",
     statusNoDebt: "sin deuda",
     statusHealthy: "sana",
@@ -195,8 +196,9 @@ export const STRINGS: Record<Lang, Record<string, string>> = {
     faqA4: "Anyone with the ntfy topic link. Topics are long random strings, not sequential IDs, but ntfy has no access control on free topics - don't put sensitive info there.",
     limitsTitle: "Honest limits",
     limitsBody:
-      "Testnet only. Few positions, almost all healthy. We don't read the Reflector oracle directly - see the FAQ. ntfy topics are public by design, even if hard to guess. This is not financial advice: Centinela only observes and notifies, it is never a guarantee.",
-    footerAiNote: "Built with help from an AI agent (Claude) during the event.",
+      "Testnet only. Today the scanner knows one position, the one Writz documents, and it is closed. The contract reports about 3 USDC borrowed (26-oct-2026), so there is at least one open position we have not discovered yet: finding it is the next step. We don't read the Reflector oracle directly - see the FAQ. ntfy topics are public by design, even if hard to guess. This is not financial advice: Centinela only observes and notifies, it is never a guarantee.",
+    footerAiNote: "Giovanny Amador and Monserrat Mendoza · Pura Vida Ideathon 2026 (Genesis). Built with help from an AI agent (Claude) during the event.",
+    logDetected: "detected:",
     langToggle: "Español",
     statusNoDebt: "no debt",
     statusHealthy: "healthy",

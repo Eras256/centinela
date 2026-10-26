@@ -356,7 +356,7 @@ function renderSimulator(preselect?: string): string {
 function renderLogItem(h: HistoryEntry): string {
   const from = h.fromStatus ? t(lang, STATUS_KEY[h.fromStatus] ?? h.fromStatus) : "-";
   const to = t(lang, STATUS_KEY[h.toStatus] ?? h.toStatus);
-  return `<li><span class="log-time">${esc(new Date(h.atIso).toLocaleString(lang))}</span><a class="mono" href="${POSITION_ROUTE}${encodeURIComponent(h.txidDisplay)}">${esc(h.txidDisplay.slice(0, 10))}...</a><span>${t(lang, "logFrom")} <strong>${esc(from)}</strong> ${t(lang, "logTo")} <strong>${esc(to)}</strong></span></li>`;
+  return `<li><span class="log-time">${esc(new Date(h.atIso).toLocaleString(lang))}</span><a class="mono" href="${POSITION_ROUTE}${encodeURIComponent(h.txidDisplay)}">${esc(h.txidDisplay.slice(0, 10))}...</a><span>${h.fromStatus ? `${t(lang, "logFrom")} <strong>${esc(from)}</strong> ${t(lang, "logTo")}` : t(lang, "logDetected")} <strong>${esc(to)}</strong></span></li>`;
 }
 
 function renderLog(): string {
