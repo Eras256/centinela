@@ -1,9 +1,9 @@
 {
-  "scannedAt": "2026-10-31T17:33:08.910Z",
+  "scannedAt": "2026-10-31T20:38:54.483Z",
   "network": "testnet",
   "writzLendContractId": "CABF7VK7F25ZGDLV6EWSAU3NYQYKDQNDSJIISDMDZAUASMSXUADSHZGG",
   "bitcoinSpvContractId": "CBX23YKCCJMAMBMSCNP6YVKEXUIYK2CTKSR4TQ3RVBPAFYZFVCW7W4EO",
-  "tipHeight": 328837,
+  "tipHeight": 328854,
   "positions": [
     {
       "txidDisplay": "eac0f95c531b4bd5307597f74bedd7379928539056b9a1467ea6d1159507e269",
@@ -15,13 +15,13 @@
       "healthBp": "max",
       "healthDisplay": "no debt",
       "timelockHeight": 381000,
-      "tipHeight": 328837,
-      "blocksUntilLiquidationCutoff": 51875,
+      "tipHeight": 328854,
+      "blocksUntilLiquidationCutoff": 51858,
       "timelockNear": false,
       "pctDropToLiquidation": null,
       "lastUpdateLedger": 5389377,
       "ntfyTopic": "centinela-testnet-69e20795-56f43619fc",
-      "updatedAt": "2026-10-31T17:33:08.910Z"
+      "updatedAt": "2026-10-31T20:38:54.483Z"
     }
   ],
   "discoverySources": {
