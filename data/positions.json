@@ -1,9 +1,9 @@
 {
-  "scannedAt": "2026-11-03T10:06:35.924Z",
+  "scannedAt": "2026-11-03T17:45:17.462Z",
   "network": "testnet",
   "writzLendContractId": "CABF7VK7F25ZGDLV6EWSAU3NYQYKDQNDSJIISDMDZAUASMSXUADSHZGG",
   "bitcoinSpvContractId": "CBX23YKCCJMAMBMSCNP6YVKEXUIYK2CTKSR4TQ3RVBPAFYZFVCW7W4EO",
-  "tipHeight": 329239,
+  "tipHeight": 329288,
   "positions": [
     {
       "txidDisplay": "eac0f95c531b4bd5307597f74bedd7379928539056b9a1467ea6d1159507e269",
@@ -15,19 +15,20 @@
       "healthBp": "max",
       "healthDisplay": "no debt",
       "timelockHeight": 381000,
-      "tipHeight": 329239,
-      "blocksUntilLiquidationCutoff": 51473,
+      "tipHeight": 329288,
+      "blocksUntilLiquidationCutoff": 51424,
       "timelockNear": false,
       "pctDropToLiquidation": null,
       "lastUpdateLedger": 5389377,
       "ntfyTopic": "centinela-testnet-69e20795-56f43619fc",
-      "updatedAt": "2026-11-03T10:06:35.923Z"
+      "updatedAt": "2026-11-03T17:45:17.462Z"
     }
   ],
   "discoverySources": {
     "69e2079515d1a67e46a1b9569053289937d7ed4bf7977530d54b1b535cf9c0ea": "seed"
   },
   "warnings": [
-    "Current time is past the documented writz-lend switch (2026-10-26T18:37:00Z) and no WRITZ_LEND_CONTRACT_ID override is set. Using the configured ID (CABF7VK7F25ZGDLV6EWSAU3NYQYKDQNDSJIISDMDZAUASMSXUADSHZGG); if reads start failing, set WRITZ_LEND_CONTRACT_ID=CDKXFBHUBIEUD2OXBSB44RJYZ2KM6NIPJF2EFVVA3UCACWJETN4O5VBG and rerun."
+    "Current time is past the documented writz-lend switch (2026-10-26T18:37:00Z) and no WRITZ_LEND_CONTRACT_ID override is set. Using the configured ID (CABF7VK7F25ZGDLV6EWSAU3NYQYKDQNDSJIISDMDZAUASMSXUADSHZGG); if reads start failing, set WRITZ_LEND_CONTRACT_ID=CDKXFBHUBIEUD2OXBSB44RJYZ2KM6NIPJF2EFVVA3UCACWJETN4O5VBG and rerun.",
+    "getLatestLedger failed: TypeError: XDR Read Error: unknown StellarValueType member for value 3"
   ]
 }
