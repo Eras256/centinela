@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-11-26T12:14:50.434Z",
+  "scannedAt": "2026-11-26T21:35:14.866Z",
   "network": "testnet",
   "writzLendContractId": "CABF7VK7F25ZGDLV6EWSAU3NYQYKDQNDSJIISDMDZAUASMSXUADSHZGG",
   "bitcoinSpvContractId": "CBX23YKCCJMAMBMSCNP6YVKEXUIYK2CTKSR4TQ3RVBPAFYZFVCW7W4EO",
@@ -21,7 +21,7 @@
       "pctDropToLiquidation": null,
       "lastUpdateLedger": 5389377,
       "ntfyTopic": "centinela-testnet-69e20795-56f43619fc",
-      "updatedAt": "2026-11-26T12:14:50.434Z"
+      "updatedAt": "2026-11-26T21:35:14.865Z"
     }
   ],
   "discoverySources": {
